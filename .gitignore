@@ -1,0 +1,8 @@
+node_modules/
+.env
+build/
+.svelte-kit/
+pb_setup/pocketbase
+pb_setup/pb_data/
+pb_data/
+docker-compose.yml

@@ -1,0 +1,4 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [".opencode/skills/agile-health-monitor/SKILL.md"]
+}
