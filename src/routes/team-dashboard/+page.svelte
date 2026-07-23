@@ -165,7 +165,7 @@
                 {@const scores = sprintSummaryMap[sprint.id]}
                 {@const score = scores ? scores[q.field] : null}
                 <td
-                  class="clickable px-4 py-3 text-center text-sm font-semibold transition-opacity hover:opacity-85"
+                  class="clickable px-4 py-3 text-center text-sm font-semibold ring-1 ring-white transition-opacity hover:opacity-85"
                   style="background-color:{getTrafficLightColor(score)}; color:{score && score <= 2 ? '#000' : '#fff'};"
                   title={getTrafficLightLabel(score)}
                   onclick={() => openCommentsModal(sprint.id, sprint.sprint)}
