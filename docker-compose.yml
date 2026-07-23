@@ -9,7 +9,7 @@ services:
       sh -c "
       /pb/pocketbase serve --http=0.0.0.0:8090 &
       sleep 5
-      /pb/pocketbase superuser upsert admin@healthmonitor.nl admin123456 2>/dev/null || true
+      /pb/pocketbase superuser upsert \${PB_ADMIN_EMAIL} \${PB_ADMIN_PASSWORD} 2>/dev/null || true
       wait
       "
     healthcheck:
