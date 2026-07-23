@@ -5,4 +5,3 @@ build/
 pb_setup/pocketbase
 pb_setup/pb_data/
 pb_data/
-docker-compose.yml
