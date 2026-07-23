@@ -2,7 +2,7 @@ import { surveyQuestions } from './src/lib/config.js';
 
 const PB_URL = 'http://127.0.0.1:8090';
 const ADMIN_EMAIL = 'admin@healthmonitor.nl';
-const ADMIN_PASSWORD = 'admin123456';
+const ADMIN_PASSWORD = 'Anker01!';
 
 let adminToken = '';
 

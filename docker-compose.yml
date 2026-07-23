@@ -8,13 +8,20 @@ services:
     environment:
       - PB_ADMIN_EMAIL=${PB_ADMIN_EMAIL}
       - PB_ADMIN_PASSWORD=${PB_ADMIN_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8090/api/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     restart: unless-stopped
 
   setup:
     image: ghcr.io/ismail2134/agile-health-monitor:latest
-    command: ['node', 'setup-pb.mjs']
+    command: ['sh', '-c', 'sleep 5 && node setup-pb.mjs']
     depends_on:
-      - pocketbase
+      pocketbase:
+        condition: service_healthy
     environment:
       - PB_URL=http://pocketbase:8090
 
