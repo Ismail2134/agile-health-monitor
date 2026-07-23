@@ -58,7 +58,7 @@
         {/if}
       </button>
       {#if user}
-        <a href="/logout" onclick={handleLogout} class="ml-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200">
+        <a href="/logout" data-sveltekit-preload-data="off" onclick={handleLogout} class="ml-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200">
           Uitloggen
         </a>
       {/if}
