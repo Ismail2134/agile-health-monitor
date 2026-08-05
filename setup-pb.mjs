@@ -1,8 +1,8 @@
 import { surveyQuestions } from './src/lib/config.js';
 
-const PB_URL = 'http://127.0.0.1:8090';
-const ADMIN_EMAIL = 'admin@healthmonitor.nl';
-const ADMIN_PASSWORD = 'Anker01!';
+const PB_URL = process.env.PB_URL || 'http://127.0.0.1:8090';
+const ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL || 'admin@healthmonitor.nl';
+const ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD || 'Anker01!';
 
 let adminToken = '';
 
@@ -52,34 +52,46 @@ async function setup() {
   try {
     const usersCol = await api('GET', '/collections/users');
     const fields = usersCol.fields || [];
+    const indexes = usersCol.indexes || [];
     const hasTeam = fields.some(f => f.name === 'team');
     const hasAdmin = fields.some(f => f.name === 'admin');
-    const newFields = fields.filter(f => f.name !== 'username');
-    newFields.push({ name: 'username', type: 'text', required: true, max: 50, unique: true });
-    if (!hasTeam) newFields.push({ name: 'team', type: 'text', required: false, max: 500 });
-    if (!hasAdmin) newFields.push({ name: 'admin', type: 'bool', required: false });
+    const hasUsername = fields.some(f => f.name === 'username');
 
-    try {
+    if (!hasUsername) {
+      const newFields = [...fields, { name: 'username', type: 'text', required: true, max: 50 }];
       await api('PATCH', '/collections/users', { fields: newFields });
-    } catch (e) {
-      // Fields may already be up-to-date
+    }
+
+    if (!hasTeam) {
+      const currentCol = await api('GET', '/collections/users');
+      const f2 = [...currentCol.fields, { name: 'team', type: 'text', required: false, max: 500 }];
+      await api('PATCH', '/collections/users', { fields: f2 });
+    }
+
+    if (!hasAdmin) {
+      const currentCol = await api('GET', '/collections/users');
+      const f3 = [...currentCol.fields, { name: 'admin', type: 'bool', required: false }];
+      await api('PATCH', '/collections/users', { fields: f3 });
     }
 
     const updatedCol = await api('GET', '/collections/users');
     const usernameField = updatedCol.fields?.find(f => f.name === 'username');
+    const hasUsernameIndex = updatedCol.indexes?.some(idx => idx.includes('username'));
     const hasUsernameIdentity = updatedCol.passwordAuth?.identityFields?.includes('username');
 
-    console.log(usernameField ? '   "username" field ready.' : '   (username field pending — check PocketBase Admin)');
+    console.log(usernameField ? '   "username" field ready.' : '   (username field pending)');
+
+    if (!hasUsernameIndex && usernameField) {
+      const newIndexes = [...(updatedCol.indexes || []), 'CREATE UNIQUE INDEX `idx_username__pb_users_auth_` ON `users` (`username`)'];
+      await api('PATCH', '/collections/users', { indexes: newIndexes });
+      console.log('   Unique index added for username.');
+    }
 
     if (!hasUsernameIdentity) {
-      try {
-        await api('PATCH', '/collections/users', {
-          passwordAuth: { enabled: true, identityFields: ['username', 'email'] }
-        });
-        console.log('   Username login enabled.');
-      } catch (e) {
-        console.log('   NOTE: Enable username login via PocketBase Admin > Users > Settings > "Username"');
-      }
+      await api('PATCH', '/collections/users', {
+        passwordAuth: { enabled: true, identityFields: ['username', 'email'] }
+      });
+      console.log('   Username login enabled.');
     } else {
       console.log('   Username login enabled.');
     }
@@ -222,6 +234,26 @@ async function setup() {
     }
   } catch (err) {
     console.log(`   users: ${err.message}`);
+  }
+
+  console.log('\n14. Seeding admin user...');
+  try {
+    const existing = await api('GET', '/collections/users/records?filter=(username="admin")');
+    if (!(existing.items && existing.items.length > 0)) {
+      await api('POST', '/collections/users/records', {
+        username: 'admin',
+        email: 'admin@healthmonitor.app',
+        password: ADMIN_PASSWORD,
+        passwordConfirm: ADMIN_PASSWORD,
+        team: 'Team Alpha',
+        admin: true
+      });
+      console.log(`   Admin user "admin" created. Login: admin / ${ADMIN_PASSWORD}`);
+    } else {
+      console.log('   Admin user already exists.');
+    }
+  } catch (err) {
+    console.log('   Note:', err.message);
   }
 
   console.log('\n=== Setup complete! ===');
