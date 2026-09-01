@@ -1,14 +1,16 @@
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  const teams = await locals.pb.collection('teams').getFullList();
-  const sprints = await locals.pb.collection('sprints').getFullList();
-  const users = await locals.pb.collection('users').getFullList();
-  const votes = await locals.pb.collection('team_health').getFullList();
+  let teamCount = 0;
+  let sprintCount = 0;
+  let userCount = 0;
+  let voteCount = 0;
 
-  return {
-    teamCount: teams.length,
-    sprintCount: sprints.length,
-    userCount: users.length,
-    voteCount: votes.length
-  };
+  try {
+    teamCount = (await locals.pb.collection('teams').getFullList()).length;
+    sprintCount = (await locals.pb.collection('sprints').getFullList()).length;
+    userCount = (await locals.pb.collection('users').getFullList()).length;
+    voteCount = (await locals.pb.collection('team_health').getFullList()).length;
+  } catch { /* PocketBase niet beschikbaar */ }
+
+  return { teamCount, sprintCount, userCount, voteCount };
 }

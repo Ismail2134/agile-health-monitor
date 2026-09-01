@@ -5,14 +5,22 @@ export async function load({ params, locals }) {
   const code = params.code;
   if (!/^\d{6}$/.test(code)) return { session: null };
 
-  const sessions = await locals.pb.collection('sessions').getFullList({
-    filter: `code = "${code}"`
-  });
+  let sessions;
+  let sprints;
+  try {
+    sessions = await locals.pb.collection('sessions').getFullList({ filter: `code = "${code}"` });
+  } catch {
+    return { session: null };
+  }
 
   if (sessions.length === 0) return { session: null };
   const session = sessions[0];
 
-  const sprints = await locals.pb.collection('sprints').getFullList();
+  try {
+    sprints = await locals.pb.collection('sprints').getFullList();
+  } catch {
+    sprints = [];
+  }
   const sprint = sprints.find(s => s.id === session.sprint);
   const sprintName = sprint?.sprint || session.sprint;
 
@@ -52,6 +60,7 @@ export const actions = {
     try {
       await locals.pb.collection('team_health').create(record);
       await updateTeamSummary(locals, team, sprint);
+      await updateTeamComments(locals, team, sprint);
       return { success: true };
     } catch (err) {
       return { error: 'Fout bij opslaan.' };
@@ -77,5 +86,31 @@ async function updateTeamSummary(locals, team, sprintId) {
     await locals.pb.collection('team_summary').update(existing[0].id, summaryData);
   } else {
     await locals.pb.collection('team_summary').create(summaryData);
+  }
+}
+
+async function updateTeamComments(locals, team, sprintId) {
+  const allVotes = await locals.pb.collection('team_health').getFullList({
+    filter: `team = "${team}" && sprint = "${sprintId}"`
+  });
+  const commentsData = { team, sprint: sprintId };
+  for (const q of surveyQuestions) {
+    const commentField = q.field + '_comment';
+    const allComments = allVotes
+      .map(v => v[commentField])
+      .filter(c => c && c.trim());
+    if (allComments.length > 0) {
+      commentsData[commentField] = allComments.join(' | ');
+    } else {
+      commentsData[commentField] = '';
+    }
+  }
+  const existing = await locals.pb.collection('team_comments').getFullList({
+    filter: `team = "${team}" && sprint = "${sprintId}"`
+  });
+  if (existing.length > 0) {
+    await locals.pb.collection('team_comments').update(existing[0].id, commentsData);
+  } else {
+    await locals.pb.collection('team_comments').create(commentsData);
   }
 }

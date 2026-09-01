@@ -1,6 +1,9 @@
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  const teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+  let teams = [];
+  try {
+    teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+  } catch { /* PocketBase niet beschikbaar */ }
   return { teams: structuredClone(teams) };
 }
 

@@ -4,20 +4,29 @@ import { error } from '@sveltejs/kit';
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ params, locals }) {
   const slug = params.slug;
-  const sessions = await locals.pb.collection('sessions').getFullList({
-    filter: `slug = "${slug}"`
-  });
+  let sessions;
+  try {
+    sessions = await locals.pb.collection('sessions').getFullList({
+      filter: `slug = "${slug}"`
+    });
+  } catch {
+    throw error(404, 'Sessie niet gevonden.');
+  }
   if (sessions.length === 0) throw error(404, 'Sessie niet gevonden.');
   const session = sessions[0];
 
-  const sprints = await locals.pb.collection('sprints').getFullList();
+  let sprints = [];
+  let healthRecords = [];
+  try {
+    sprints = await locals.pb.collection('sprints').getFullList();
+    healthRecords = await locals.pb.collection('team_health').getFullList({
+      filter: `session = "${session.id}"`,
+      sort: '-id'
+    });
+  } catch { /* PocketBase niet beschikbaar */ }
+
   const sprint = sprints.find(s => s.id === session.sprint);
   const sprintName = sprint?.sprint || session.sprint;
-
-  const healthRecords = await locals.pb.collection('team_health').getFullList({
-    filter: `session = "${session.id}"`,
-    sort: '-id'
-  });
 
   const voterSet = new Set();
   const matrix = {};
@@ -98,6 +107,12 @@ export const actions = {
         for (const s of existingSummary) {
           await locals.pb.collection('team_summary').delete(s.id);
         }
+        const existingComments = await locals.pb.collection('team_comments').getFullList({
+          filter: `team = "${team}" && sprint = "${sprint}"`
+        });
+        for (const c of existingComments) {
+          await locals.pb.collection('team_comments').delete(c.id);
+        }
       } else {
         const summaryData = { team, sprint };
         for (const q of surveyQuestions) {
@@ -110,6 +125,23 @@ export const actions = {
           await locals.pb.collection('team_summary').update(existingSummary[0].id, summaryData);
         } else {
           await locals.pb.collection('team_summary').create(summaryData);
+        }
+
+        const commentsData = { team, sprint };
+        for (const q of surveyQuestions) {
+          const commentField = q.field + '_comment';
+          const allComments = allVotes
+            .map(v => v[commentField])
+            .filter(c => c && c.trim());
+          commentsData[commentField] = allComments.length > 0 ? allComments.join(' | ') : '';
+        }
+        const existingComments = await locals.pb.collection('team_comments').getFullList({
+          filter: `team = "${team}" && sprint = "${sprint}"`
+        });
+        if (existingComments.length > 0) {
+          await locals.pb.collection('team_comments').update(existingComments[0].id, commentsData);
+        } else {
+          await locals.pb.collection('team_comments').create(commentsData);
         }
       }
 

@@ -122,7 +122,7 @@
             </form>
           </td>
           <td class="px-4 py-3">
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-1.5">
               <button type="button" class="btn-secondary btn-xs" onclick={() => copyLink(s.code)}>Kopieer link</button>
               <a href="/admin/sessions/{s.slug}" class="btn-secondary btn-xs no-underline">Details</a>
               <a href="/vote/{s.code}" target="_blank" class="btn-secondary btn-xs no-underline">Starten</a>

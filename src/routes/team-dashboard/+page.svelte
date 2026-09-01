@@ -10,6 +10,7 @@
   let selectedTeam = $state('');
   let showModal = $state(false);
   let modalSprint = $state(null);
+  let modalQuestion = $state('');
   let modalComments = $state(null);
 
   $effect(() => {
@@ -66,8 +67,20 @@
     )
   );
 
-  function openCommentsModal(sprintId, sprintName) {
+  let commentMap = $derived(
+    Object.fromEntries((data?.allComments ?? []).map(c => [c.sprint, c]))
+  );
+
+  function hasComment(sprintId, field) {
+    const record = commentMap[sprintId];
+    if (!record) return false;
+    const val = record[field + '_comment'];
+    return !!(val && val.trim());
+  }
+
+  function openCommentsModal(sprintId, sprintName, questionName = '') {
     modalSprint = sprintName;
+    modalQuestion = questionName;
     const commentRecord = data?.allComments?.find(c => c.sprint === sprintId);
     modalComments = commentRecord || null;
     showModal = true;
@@ -76,6 +89,7 @@
   function closeModal() {
     showModal = false;
     modalSprint = null;
+    modalQuestion = '';
     modalComments = null;
   }
 
@@ -143,7 +157,7 @@
               Categorie
             </th>
             {#each filteredSprints as sprint}
-              <th class="clickable bg-gray-50 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700" onclick={() => openCommentsModal(sprint.id, sprint.sprint)} title="Klik voor comments">
+              <th class="clickable bg-gray-50 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700" onclick={() => openCommentsModal(sprint.id, sprint.sprint, '')} title="Klik voor comments">
                 {sprint.sprint}
               </th>
             {/each}
@@ -165,12 +179,15 @@
                 {@const scores = sprintSummaryMap[sprint.id]}
                 {@const score = scores ? scores[q.field] : null}
                 <td
-                  class="clickable px-4 py-3 text-center text-sm font-semibold ring-1 ring-white transition-opacity hover:opacity-85"
+                  class="clickable relative px-4 py-3 text-center text-sm font-semibold ring-1 ring-white transition-opacity hover:opacity-85"
                   style="background-color:{getTrafficLightColor(score)}; color:{score && score <= 2 ? '#000' : '#fff'};"
                   title={getTrafficLightLabel(score)}
-                  onclick={() => openCommentsModal(sprint.id, sprint.sprint)}
+                  onclick={() => openCommentsModal(sprint.id, sprint.sprint, q.question)}
                 >
                   {score !== null ? score : '-'}
+                  {#if hasComment(sprint.id, q.field)}
+                    <span class="absolute top-0.5 right-0.5 text-xs leading-none" title="Heeft comment">&#x1F4AC;</span>
+                  {/if}
                 </td>
               {/each}
             </tr>
@@ -191,15 +208,32 @@
   <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
   <div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="document">
       <div class="flex items-start justify-between">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Comments voor sprint: {modalSprint}</h2>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+          {modalQuestion ? `Comment voor — ${modalQuestion}` : `Comments voor sprint: ${modalSprint}`}
+        </h2>
         <button onclick={closeModal} class="btn-ghost rounded-lg p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Sluiten">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
         </button>
       </div>
 
       <div class="mt-5 space-y-4">
+        {#if modalQuestion}
+          {@const qObj = data.questions.find(q => q.question === modalQuestion)}
+          {#if qObj}
+            <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+              <div class="mb-2 border-l-4 border-green-500 pl-3">
+                <strong class="text-xs text-gray-900 dark:text-white"><span class="dot-sm green"></span> Goed:</strong>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{qObj.good}</p>
+              </div>
+              <div class="border-l-4 border-red-500 pl-3">
+                <strong class="text-xs text-gray-900 dark:text-white"><span class="dot-sm red"></span> Slecht:</strong>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{qObj.bad}</p>
+              </div>
+            </div>
+          {/if}
+        {/if}
         {#if modalComments}
-          {#each data.questions as q}
+          {#each modalQuestion ? data.questions.filter(q => q.question === modalQuestion) : data.questions as q}
             {@const comment = modalComments[q.field + '_comment']}
             {#if comment}
               <div class="comment-block">

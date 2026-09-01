@@ -33,7 +33,7 @@
       maxlength="6"
       placeholder="000000"
       bind:value={code}
-      class="mx-auto mb-5 block w-72 rounded-xl border-2 border-gray-200 bg-gray-50 py-3 text-center text-4xl tracking-[0.4em] font-semibold text-gray-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400"
+      class="mx-auto mb-5 block w-full max-w-72 rounded-xl border-2 border-gray-200 bg-gray-50 py-3 text-center text-3xl sm:text-4xl tracking-[0.4em] font-semibold text-gray-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400"
       style="font-variant-numeric: tabular-nums;"
     />
     <button type="submit" class="btn-primary w-48 py-2.5">Start stemmen</button>

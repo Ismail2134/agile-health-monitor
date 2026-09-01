@@ -103,7 +103,7 @@
             </button>
           </form>
         </summary>
-        <div class="border-t border-gray-200 dark:border-gray-700">
+        <div class="overflow-x-auto border-t border-gray-200 dark:border-gray-700">
           <table class="w-full">
             <thead>
               <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">

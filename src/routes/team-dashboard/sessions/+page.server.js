@@ -7,23 +7,31 @@ export async function load({ locals }) {
   const userTeams = (locals.user.team || '').split(', ').filter(Boolean);
   const isAdmin = locals.isAdmin;
 
-  const teams = isAdmin
-    ? await locals.pb.collection('teams').getFullList({ sort: 'team' })
-    : userTeams.map(t => ({ team: t }));
+  let teams = [];
+  let sprints = [];
+  let sessions = [];
 
-  const sprints = isAdmin
-    ? await locals.pb.collection('sprints').getFullList({ sort: 'sprint' })
-    : await locals.pb.collection('sprints').getFullList({
-        sort: 'sprint',
-        filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
-      });
+  try {
+    if (isAdmin) {
+      teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+    } else {
+      teams = userTeams.map(t => ({ team: t }));
+    }
 
-  const sessions = isAdmin
-    ? await locals.pb.collection('sessions').getFullList({ sort: '-id' })
-    : await locals.pb.collection('sessions').getFullList({
-        sort: '-id',
-        filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
-      });
+    sprints = isAdmin
+      ? await locals.pb.collection('sprints').getFullList({ sort: 'sprint' })
+      : await locals.pb.collection('sprints').getFullList({
+          sort: 'sprint',
+          filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
+        });
+
+    sessions = isAdmin
+      ? await locals.pb.collection('sessions').getFullList({ sort: '-id' })
+      : await locals.pb.collection('sessions').getFullList({
+          sort: '-id',
+          filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
+        });
+  } catch { /* PocketBase niet beschikbaar */ }
 
   const sprintMap = Object.fromEntries(sprints.map(s => [s.id, s.sprint]));
 

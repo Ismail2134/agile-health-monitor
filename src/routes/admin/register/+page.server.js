@@ -5,7 +5,10 @@ export async function load({ locals }) {
   if (!locals.user) throw redirect(303, '/login');
   if (!locals.isAdmin) throw redirect(303, '/team-dashboard');
 
-  const teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+  let teams = [];
+  try {
+    teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+  } catch { /* PocketBase niet beschikbaar */ }
   return {
     teams: structuredClone(teams)
   };

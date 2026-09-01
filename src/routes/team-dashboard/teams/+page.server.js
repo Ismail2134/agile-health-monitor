@@ -8,12 +8,15 @@ export async function load({ locals }) {
   const userId = locals.user.id;
   const userTeams = (locals.user.team || '').split(', ').filter(Boolean);
 
-  const teams = isAdmin
-    ? await locals.pb.collection('teams').getFullList({ sort: 'team' })
-    : await locals.pb.collection('teams').getFullList({
-        sort: 'team',
-        filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
-      });
+  let teams = [];
+  try {
+    teams = isAdmin
+      ? await locals.pb.collection('teams').getFullList({ sort: 'team' })
+      : await locals.pb.collection('teams').getFullList({
+          sort: 'team',
+          filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
+        });
+  } catch { /* PocketBase niet beschikbaar */ }
 
   return {
     teams: structuredClone(teams),

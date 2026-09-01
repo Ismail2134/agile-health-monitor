@@ -45,7 +45,7 @@
 {#if session?.active}
   <div class="card mb-8 p-6 text-center">
     <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Deel deze code met je team</h3>
-    <div class="my-4 text-5xl font-bold tracking-[0.5em] text-brand-600 dark:text-brand-400">{session.code}</div>
+    <div class="my-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-[0.2em] sm:tracking-[0.3em] md:tracking-[0.5em] text-brand-600 dark:text-brand-400">{session.code}</div>
     <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">of scan de QR-code:</p>
     <div class="inline-block">
       <QRCode url={voteUrl || ''} size={200} />
@@ -87,7 +87,7 @@
                   <input type="hidden" name="team" value={session?.team ?? ''} />
                   <input type="hidden" name="sprint" value={session?.sprint ?? ''} />
                   <button type="submit"
-                    class="rounded px-1 py-0 text-[10px] text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
+                    class="rounded px-1 py-0 sm:px-2 sm:py-1 text-[10px] sm:text-sm text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
                     title="Stem verwijderen"
                     onclick={(e) => { if (!confirm('Stem van ' + voter + ' verwijderen?')) e.preventDefault(); }}
                   >

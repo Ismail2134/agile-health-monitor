@@ -7,10 +7,13 @@ export async function load({ locals }) {
   }
 
   const userTeams = (locals.user.team || '').split(', ').filter(Boolean);
-  const teams = await locals.pb.collection('teams').getFullList({
-    sort: 'team',
-    filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
-  });
+  let teams = [];
+  try {
+    teams = await locals.pb.collection('teams').getFullList({
+      sort: 'team',
+      filter: userTeams.map(t => `team = "${t}"`).join(' || ') || 'team = ""'
+    });
+  } catch { /* PocketBase niet beschikbaar */ }
 
   return {
     user: structuredClone(locals.user),

@@ -98,10 +98,10 @@
   ]);
 </script>
 
-<div class="flex flex-wrap items-center justify-center gap-6">
-  <div class="min-w-[340px] max-w-[540px] flex-1">
+<div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+  <div class="min-w-0 max-w-[540px] flex-1">
     <div class="overflow-x-auto">
-      <svg viewBox="0 0 {size} {size}" width={size} height={size} class="max-w-full">
+      <svg viewBox="0 0 {size} {size}" class="w-full h-auto max-w-full">
         {#each zones as zone}
           {@const pts = axisLabels.map(a => polar(a.angle, zone.r))}
           <polygon
@@ -185,16 +185,16 @@
     {/if}
   </div>
 
-  <div class="min-w-[180px]">
-    <div class="mb-2 flex gap-2">
-      <button type="button" class="btn-secondary btn-xs text-[11px]" onclick={toggleAll}>Alles aan</button>
-      <button type="button" class="btn-secondary btn-xs text-[11px]" onclick={clearAll}>Alles uit</button>
+  <div class="min-w-[120px] sm:min-w-[180px]">
+    <div class="mb-2 flex flex-wrap gap-1.5">
+      <button type="button" class="btn-secondary btn-xs sm:btn-sm text-[11px] sm:text-xs" onclick={toggleAll}>Alles aan</button>
+      <button type="button" class="btn-secondary btn-xs sm:btn-sm text-[11px] sm:text-xs" onclick={clearAll}>Alles uit</button>
     </div>
     <div class="flex flex-col gap-1">
       {#each chartDatasets as ds, di}
         {@const checked = visible.has(di)}
         {@const color = sprintColors[di % sprintColors.length]}
-        <label class="flex cursor-pointer items-center gap-1.5 text-xs transition-opacity" class:opacity-45={!checked}>
+        <label class="flex cursor-pointer items-center gap-1.5 py-1.5 text-xs transition-opacity" class:opacity-45={!checked}>
           <input type="checkbox" checked={checked} onchange={() => toggle(di)} class="h-3.5 w-3.5 rounded border-gray-300" />
           <span class="inline-block h-[3px] w-3.5 rounded-sm" style="background:{color};"></span>
           {ds.label}

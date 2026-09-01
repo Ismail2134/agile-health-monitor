@@ -5,6 +5,17 @@ description: Use when working on the agile-health-monitor project — a SvelteKi
 
 # Agile Health Monitor
 
+## Bezette poorten (niet gebruiken in andere projecten)
+
+| Poort | Service | Project |
+|---|---|---|
+| `localhost:3000` | Productie app (adapter-node / Docker) | agile-health-monitor |
+| `localhost:5173` | Vite dev server | agile-health-monitor |
+| `localhost:5174` | Vite dev server | poker app |
+| `localhost:8090` | PocketBase API + Admin UI | agile-health-monitor |
+
+Bij nieuwe projecten: kies andere poorten dan bovenstaande.
+
 ## Wat het project doet
 
 Een SvelteKit applicatie gebaseerd op het Spotify Squad Health Check model. Scrum Masters/agile coaches meten team-gezondheid via een stoplicht-enquête (groen/oranje/rood) over 15 dimensies per sprint. Anonieme teamleden stemmen via een 6-cijferige code.
@@ -13,7 +24,7 @@ Een SvelteKit applicatie gebaseerd op het Spotify Squad Health Check model. Scru
 
 - **Framework:** SvelteKit (Svelte 5 met runes: `$state()`, `$derived()`, `$effect()`)
 - **Backend:** PocketBase v0.23 (ingebakken Auth + SQLite + REST API)
-- **CSS:** Pico CSS v2 (light/dark theme)
+- **CSS:** Tailwind CSS v4 (light/dark theme)
 - **Adapter:** `@sveltejs/adapter-node` voor productie
 - **Deployment:** Docker + docker-compose (3 services: pocketbase, setup, app)
 - **Taal:** JavaScript (ES Modules), géén TypeScript. JSDoc voor annotaties.
@@ -22,7 +33,7 @@ Een SvelteKit applicatie gebaseerd op het Spotify Squad Health Check model. Scru
 
 ```
 src/
-├── app.css                    # Pico CSS + custom styles
+├── app.css                    # Tailwind CSS + custom styles
 ├── app.html                   # HTML shell
 ├── hooks.server.js            # Auth + questions laden (draait elke request)
 ├── lib/
@@ -89,7 +100,7 @@ src/
 - **Module systeem:** ESM (`import`/`export`, `"type": "module"`).
 - **UI tekst:** Alle user-facing tekst en comments zijn in het Nederlands.
 - **Componenten:** Svelte 5 syntax — gebruik `$state()`, `$derived()`, `$effect()` runes, niet de oude Svelte 4 stores.
-- **Styling:** Pico CSS met custom CSS variabelen in `app.css`. Gebruik Pico utility classes en semantische HTML.
+- **Styling:** Tailwind CSS v4 met custom CSS in `app.css`. Gebruik Tailwind utility classes en `@layer` voor component-stijlen.
 - **PocketBase queries:** Gebruik de PocketBase JavaScript SDK (`pb.collection('name').getFullList()` etc).
 
 ## De 15 survey vragen (standaard)

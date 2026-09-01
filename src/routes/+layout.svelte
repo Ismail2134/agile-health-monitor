@@ -7,6 +7,7 @@
   let user = $derived(data?.user ?? null);
   let isAdmin = $derived(data?.isAdmin ?? false);
   let isDark = $state(false);
+  let menuOpen = $state(false);
 
   $effect(() => {
     isDark = document.documentElement.classList.contains('dark');
@@ -20,6 +21,14 @@
     localStorage.setItem('theme', next ? 'dark' : 'light');
   }
 
+  function toggleMenu() {
+    menuOpen = !menuOpen;
+  }
+
+  function closeMenu() {
+    menuOpen = false;
+  }
+
   async function handleLogout(e) {
     e.preventDefault();
     const pb = getPb();
@@ -31,10 +40,12 @@
 
 <header class="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80">
   <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-    <a href="/" class="text-lg font-bold text-brand-700 transition-colors hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300">
+    <a href="/" onclick={closeMenu} class="text-lg font-bold text-brand-700 transition-colors hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300">
       {siteTitle}
     </a>
-    <nav class="flex items-center gap-0.5">
+
+    <!-- Desktop navigatie -->
+    <nav class="hidden sm:flex items-center gap-0.5">
       {#each navItems as item}
         {#if item.auth === undefined || (item.auth === true && user) || (item.auth === false && !user)}
           {#if !item.admin || (item.admin && isAdmin)}
@@ -44,13 +55,7 @@
           {/if}
         {/if}
       {/each}
-      <button
-        type="button"
-        onclick={toggleTheme}
-        class="ml-1 rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-        aria-label={isDark ? 'Schakel naar licht thema' : 'Schakel naar donker thema'}
-        title={isDark ? 'Licht thema' : 'Donker thema'}
-      >
+      <button type="button" onclick={toggleTheme} class="ml-1 rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800" aria-label={isDark ? 'Schakel naar licht thema' : 'Schakel naar donker thema'} title={isDark ? 'Licht thema' : 'Donker thema'}>
         {#if isDark}
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" /></svg>
         {:else}
@@ -63,7 +68,45 @@
         </a>
       {/if}
     </nav>
+
+    <!-- Mobiele knoppen -->
+    <div class="flex items-center gap-1 sm:hidden">
+      <button type="button" onclick={toggleTheme} class="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800" aria-label={isDark ? 'Schakel naar licht thema' : 'Schakel naar donker thema'} title={isDark ? 'Licht thema' : 'Donker thema'}>
+        {#if isDark}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" /></svg>
+        {:else}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
+        {/if}
+      </button>
+      {#if user}
+        <a href="/logout" data-sveltekit-preload-data="off" onclick={handleLogout} class="rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200">
+          Uitloggen
+        </a>
+      {/if}
+      <button type="button" onclick={toggleMenu} class="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800" aria-label="Menu" title="Menu">
+        {#if menuOpen}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        {:else}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+        {/if}
+      </button>
+    </div>
   </div>
+
+  <!-- Mobiel menu -->
+  {#if menuOpen}
+    <nav class="sm:hidden border-t border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900">
+      {#each navItems as item}
+        {#if item.auth === undefined || (item.auth === true && user) || (item.auth === false && !user)}
+          {#if !item.admin || (item.admin && isAdmin)}
+            <a href={item.href} onclick={closeMenu} class="block rounded-md px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100">
+              {item.label}
+            </a>
+          {/if}
+        {/if}
+      {/each}
+    </nav>
+  {/if}
 </header>
 
 <main class="mx-auto min-h-[70vh] max-w-6xl px-4 py-6 sm:px-6 lg:px-8">

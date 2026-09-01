@@ -1,6 +1,9 @@
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  const questions = await locals.pb.collection('questions').getFullList({ sort: 'order' });
+  let questions = [];
+  try {
+    questions = await locals.pb.collection('questions').getFullList({ sort: 'order' });
+  } catch { /* PocketBase niet beschikbaar */ }
   const maxOrder = questions.reduce((m, q) => Math.max(m, q.order || 0), 0);
   return { questions: structuredClone(questions), nextOrder: maxOrder + 1 };
 }

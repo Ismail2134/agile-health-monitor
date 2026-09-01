@@ -131,7 +131,7 @@
           <td class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">{sprint.sprint}</td>
           <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{sprint.team || '-'}</td>
           <td class="px-4 py-3">
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-1.5">
               <button class="btn-secondary btn-xs" onclick={() => startEdit(sprint)}>Bewerk</button>
               <form method="POST" action="?/delete" id={'delete-' + sprint.id}>
                 <input type="hidden" name="id" value={sprint.id} />

@@ -1,7 +1,11 @@
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  const sprints = await locals.pb.collection('sprints').getFullList({ sort: 'sprint' });
-  const teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+  let sprints = [];
+  let teams = [];
+  try {
+    sprints = await locals.pb.collection('sprints').getFullList({ sort: 'sprint' });
+    teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+  } catch { /* PocketBase niet beschikbaar */ }
   return { sprints: structuredClone(sprints), teams: structuredClone(teams) };
 }
 

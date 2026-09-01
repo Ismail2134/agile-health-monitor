@@ -1,8 +1,13 @@
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  const sessions = await locals.pb.collection('sessions').getFullList({ sort: '-id' });
-  const teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
-  const sprints = await locals.pb.collection('sprints').getFullList({ sort: 'sprint' });
+  let sessions = [];
+  let teams = [];
+  let sprints = [];
+  try {
+    sessions = await locals.pb.collection('sessions').getFullList({ sort: '-id' });
+    teams = await locals.pb.collection('teams').getFullList({ sort: 'team' });
+    sprints = await locals.pb.collection('sprints').getFullList({ sort: 'sprint' });
+  } catch { /* PocketBase niet beschikbaar */ }
   const sprintMap = Object.fromEntries(sprints.map(s => [s.id, s.sprint]));
   return {
     sessions: structuredClone(sessions),
