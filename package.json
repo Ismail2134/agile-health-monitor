@@ -8,7 +8,15 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "prettier --check . && eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prod:config": "docker compose -f compose.production.yml config",
+    "prod:up": "docker compose -f compose.production.yml up -d --build",
+    "prod:down": "docker compose -f compose.production.yml down",
+    "prod:logs": "docker compose -f compose.production.yml logs -f",
+    "prod:health": "docker compose -f compose.production.yml exec app wget -qO- http://127.0.0.1:3000/",
+    "prod:seed": "docker compose -f compose.production.yml --profile seed run --rm setup",
+    "prod:deploy": "./scripts/deploy-vps.sh",
+    "prod:deploy:sync": "./scripts/deploy-vps.sh --only-sync"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.0",

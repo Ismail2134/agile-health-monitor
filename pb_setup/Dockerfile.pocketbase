@@ -1,0 +1,48 @@
+# syntax=docker/dockerfile:1.7
+# PocketBase image voor productie.
+# Binary wordt tijdens build gedownload van de officiële release.
+# pb_data wordt persistent via een named volume (niet in de image).
+# Migrations komen uit een read-only mount (./pb_migrations).
+
+ARG ALPINE_VERSION=3.20
+ARG PB_VERSION=0.23.0
+
+FROM alpine:${ALPINE_VERSION} AS download
+ARG PB_VERSION
+ARG TARGETARCH
+RUN apk add --no-cache curl unzip ca-certificates
+WORKDIR /tmp
+RUN set -ex; \
+    if [ -n "${TARGETARCH:-}" ]; then \
+      ARCH="${TARGETARCH}"; \
+    else \
+      case "$(uname -m)" in \
+        x86_64)  ARCH=amd64 ;; \
+        aarch64) ARCH=arm64 ;; \
+        *) echo "Unsupported arch: $(uname -m)" && exit 1 ;; \
+      esac; \
+    fi; \
+    echo "Detected ARCH=${ARCH}"; \
+    curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_${ARCH}.zip" -o pb.zip; \
+    unzip pb.zip; \
+    chmod +x pocketbase; \
+    ./pocketbase --version
+
+FROM alpine:${ALPINE_VERSION}
+ARG PB_VERSION
+RUN apk add --no-cache ca-certificates tzdata
+RUN addgroup -g 1001 -S pocketbase && adduser -u 1001 -S -G pocketbase pocketbase
+
+WORKDIR /pb
+COPY --from=download /tmp/pocketbase /pb/pocketbase
+
+RUN mkdir -p /pb/pb_data /pb/pb_migrations && chown -R pocketbase:pocketbase /pb
+
+USER pocketbase
+EXPOSE 8090
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8090/api/health || exit 1
+
+# Migrations (read-only mount) + data (named volume).
+ENTRYPOINT ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb/pb_data", "--migrationsDir=/pb/pb_migrations"]

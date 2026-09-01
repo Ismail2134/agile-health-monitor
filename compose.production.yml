@@ -1,0 +1,104 @@
+# Docker Compose production — agile-health-monitor op Hostinger VPS
+#
+# Architectuur:
+#   Traefik (host-mode, extern op de VPS, :80→:443)   ← via docker.sock provider
+#     └── app          (SvelteKit Node, :3000 intern)
+#           └── pocketbase  (:8090, intern, named volume pb_data)
+#     └── setup        (eenmalig profile "seed")
+#
+# Traefik draait op deze VPS in host-netwerkmodus met --providers.docker.
+# Het vindt containers via de Docker API (docker.sock) en de labels hieronder;
+# er is GEEN extern Traefik-netwerk nodig.
+#
+# Gebruik (op de VPS, in /docker/agile-health-monitor):
+#   cp .env.example .env   # vul waarden in
+#   docker compose -f compose.production.yml up -d --build
+#   docker compose -f compose.production.yml --profile seed run --rm setup
+#
+# Domein wordt verplicht gecheckt via ${DOMAIN:?}.
+
+name: agile-health-monitor
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  agile-health-monitor_pb_data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agile-health-monitor-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      PB_URL: http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    networks:
+      - app-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.agile-health-monitor.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.agile-health-monitor.rule=Host(`${DOMAIN:?DOMAIN is required}`)"
+      - "traefik.http.routers.agile-health-monitor.tls=true"
+      - "traefik.http.routers.agile-health-monitor.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.services.agile-health-monitor.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  pocketbase:
+    build:
+      context: ./pb_setup
+      dockerfile: Dockerfile.pocketbase
+      args:
+        PB_VERSION: "0.23.0"
+    container_name: agile-health-monitor-pocketbase
+    restart: unless-stopped
+    volumes:
+      - agile-health-monitor_pb_data:/pb/pb_data
+      - ./pb_migrations:/pb/pb_migrations:ro
+    networks:
+      - app-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.agile-health-monitor-pb.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.agile-health-monitor-pb.rule=Host(`${DOMAIN:?DOMAIN is required}`) && (PathPrefix(`/_/`) || PathPrefix(`/api/`))"
+      - "traefik.http.routers.agile-health-monitor-pb.tls=true"
+      - "traefik.http.routers.agile-health-monitor-pb.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.agile-health-monitor-pb.priority=100"
+      - "traefik.http.services.agile-health-monitor-pb.loadbalancer.server.port=8090"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8090/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Eenmalig seeden: docker compose -f compose.production.yml --profile seed run --rm setup
+  setup:
+    profiles: ["seed"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agile-health-monitor-setup
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PB_URL: http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    networks:
+      - app-net
+    command: ["node", "setup-pb.mjs"]
