@@ -12,7 +12,7 @@
     return '#ef4444';
   }
 
-  let { questions = [], datasets = [], size = 600 } = $props();
+  let { questions = [], datasets = [], size = 600, chartMaxWidth = 540, legendTop } = $props();
   let hovered = $state(null);
   let visible = $state(new Set());
   let isDark = $state(false);
@@ -92,14 +92,14 @@
   );
 
   let zones = $derived([
-    { r: maxR,              fill: 'rgba(198,40,40,0.14)', stroke: '#ef5350', label: 'Rood', labelR: maxR * 0.92 },
-    { r: maxR * (2.5 / 3),  fill: 'rgba(230,120,20,0.15)', stroke: '#ffb74d', label: 'Oranje', labelR: maxR * 0.72 },
-    { r: maxR * (1.5 / 3),  fill: 'rgba(46,125,50,0.18)',  stroke: '#66bb6a', label: 'Groen', labelR: maxR * 0.42 }
+    { r: maxR,              fill: 'rgba(198,40,40,0.14)', stroke: '#ef5350', label: 'Slecht', labelR: maxR * 0.92 },
+    { r: maxR * (2.5 / 3),  fill: 'rgba(230,120,20,0.15)', stroke: '#ffb74d', label: 'Matig', labelR: maxR * 0.72 },
+    { r: maxR * (1.5 / 3),  fill: 'rgba(46,125,50,0.18)',  stroke: '#66bb6a', label: 'Goed', labelR: maxR * 0.42 }
   ]);
 </script>
 
 <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
-  <div class="min-w-0 max-w-[540px] flex-1">
+  <div class="min-w-0 flex-1" style={chartMaxWidth != null ? `max-width:${chartMaxWidth}px` : undefined}>
     <div class="overflow-x-auto">
       <svg viewBox="0 0 {size} {size}" class="w-full h-auto max-w-full">
         {#each zones as zone}
@@ -186,6 +186,11 @@
   </div>
 
   <div class="min-w-[120px] sm:min-w-[180px]">
+    {#if legendTop}
+      <div class="mb-3">
+        {@render legendTop()}
+      </div>
+    {/if}
     <div class="mb-2 flex flex-wrap gap-1.5">
       <button type="button" class="btn-secondary btn-xs sm:btn-sm text-[11px] sm:text-xs" onclick={toggleAll}>Alles aan</button>
       <button type="button" class="btn-secondary btn-xs sm:btn-sm text-[11px] sm:text-xs" onclick={clearAll}>Alles uit</button>

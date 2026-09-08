@@ -63,9 +63,9 @@
 
       <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Geef voor elke categorie aan hoe het gaat:</p>
       <div class="flex flex-wrap gap-4 text-xs font-medium">
-        <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900 dark:text-green-300">Groen &mdash; goed</span>
-        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-amber-700 dark:bg-amber-900 dark:text-amber-300">Oranje &mdash; matig</span>
-        <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900 dark:text-red-300">Rood &mdash; slecht</span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900 dark:text-green-300">Goed</span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-amber-700 dark:bg-amber-900 dark:text-amber-300">Matig</span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900 dark:text-red-300">Slecht</span>
       </div>
 
       {#each questions as q, i}
@@ -78,15 +78,15 @@
           <div class="radio-group mb-3">
             <label class="inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors cursor-pointer hover:bg-green-100 dark:bg-green-950 dark:text-green-400 dark:hover:bg-green-900">
               <input type="radio" name={q.field} value="1" required class="h-4 w-4 border-green-300 text-green-600 focus:ring-green-500 dark:border-green-700 dark:bg-green-900" />
-              Groen
+              Goed
             </label>
             <label class="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors cursor-pointer hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-400 dark:hover:bg-amber-900">
               <input type="radio" name={q.field} value="2" class="h-4 w-4 border-amber-300 text-amber-600 focus:ring-amber-500 dark:border-amber-700 dark:bg-amber-900" />
-              Oranje
+              Matig
             </label>
             <label class="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors cursor-pointer hover:bg-red-100 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900">
               <input type="radio" name={q.field} value="3" class="h-4 w-4 border-red-300 text-red-600 focus:ring-red-500 dark:border-red-700 dark:bg-red-900" />
-              Rood
+              Slecht
             </label>
           </div>
           <details class="group rounded-lg border border-gray-200 dark:border-gray-700">

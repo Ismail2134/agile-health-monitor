@@ -11,15 +11,15 @@ export function getTrafficLightColor(score) {
 
 export function getTrafficLightLabel(score) {
   if (score === null || score === undefined) return 'Geen data';
-  if (score <= 1.5) return 'Groen';
-  if (score <= 2.5) return 'Oranje';
-  return 'Rood';
+  if (score <= 1.5) return 'Goed';
+  if (score <= 2.5) return 'Matig';
+  return 'Slecht';
 }
 
 export function getScoreLabel(value) {
-  if (value === 1) return 'Groen';
-  if (value === 2) return 'Oranje';
-  if (value === 3) return 'Rood';
+  if (value === 1) return 'Goed';
+  if (value === 2) return 'Matig';
+  if (value === 3) return 'Slecht';
   return '-';
 }
 

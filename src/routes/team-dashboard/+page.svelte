@@ -1,6 +1,7 @@
 <script>
   import { getTrafficLightColor, getTrafficLightLabel } from '$lib/utils.js';
   import RadarChart from '$lib/components/RadarChart.svelte';
+  import HealthGauge from '$lib/components/HealthGauge.svelte';
 
   /** @type {{ data: any }} */
   let { data } = $props();
@@ -12,6 +13,7 @@
   let modalSprint = $state(null);
   let modalQuestion = $state('');
   let modalComments = $state(null);
+  let gaugeSprintId = $state('');
 
   $effect(() => {
     if (!isAdmin && userTeams.length > 0 && !selectedTeam) {
@@ -70,6 +72,32 @@
   let commentMap = $derived(
     Object.fromEntries((data?.allComments ?? []).map(c => [c.sprint, c]))
   );
+
+  function overallScore(s) {
+    const vals = [];
+    for (const q of data.questions) {
+      const x = s[q.field];
+      if (x != null) vals.push(x);
+    }
+    if (vals.length === 0) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+
+  let gaugeOptions = $derived(
+    filteredSummaries
+      .map(s => ({ id: s.sprint, name: sprintMap[s.sprint] || s.sprint, value: overallScore(s) }))
+      .filter(o => o.value != null)
+  );
+
+  let selectedGauge = $derived(gaugeOptions.find(o => o.id === gaugeSprintId) ?? gaugeOptions[0] ?? null);
+
+  $effect(() => {
+    if (gaugeOptions.length > 0 && !gaugeOptions.some(o => o.id === gaugeSprintId)) {
+      gaugeSprintId = gaugeOptions[0].id;
+    } else if (gaugeOptions.length === 0) {
+      gaugeSprintId = '';
+    }
+  });
 
   function hasComment(sprintId, field) {
     const record = commentMap[sprintId];
@@ -134,7 +162,25 @@
   {#if selectedTeam && chartDatasets.length > 0}
     <section class="mb-8">
       <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Spinnenwebdiagram &mdash; {selectedTeam}</h2>
-      <RadarChart questions={data.questions} datasets={chartDatasets} size={560} />
+      <RadarChart questions={data.questions} datasets={chartDatasets} size={560} chartMaxWidth={null}>
+        {#snippet legendTop()}
+          {#if gaugeOptions.length > 0}
+            <div class="flex flex-col items-center rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Totale team health per sprint</span>
+              <select bind:value={gaugeSprintId} class="input-field mt-1.5 w-full">
+                {#each gaugeOptions as o}
+                  <option value={o.id}>{o.name}</option>
+                {/each}
+              </select>
+              {#if selectedGauge}
+                <div class="mt-2">
+                  <HealthGauge value={selectedGauge.value} size={170} />
+                </div>
+              {/if}
+            </div>
+          {/if}
+        {/snippet}
+      </RadarChart>
     </section>
   {/if}
 
