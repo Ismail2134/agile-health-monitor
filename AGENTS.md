@@ -27,10 +27,18 @@ operationele gaten aan die een agent anders zou missen.
   deze lijst. De app toont dus altijd 15 vragen, óók met een lege DB-collectie.
 - **`questions`-collectie** (bewerkbaar via admin `/admin/questions`) wordt
   ALLEEN gevuld door `setup-pb.mjs` (seed) of handmatig in de admin-UI.
+- De admin-vragenpagina is **bevroren op 15**: geen toevoegen/verwijderen;
+  alleen vraagtekst, goed/slecht en volgorde zijn bewerkbaar. De `field`-slug
+  is vast (read-only) — hij is de koppeling naar de kolommen in
+  `team_health`/`team_summary`/`team_comments` én naar de keys in
+  `surveyQuestions`. Een slug wijzigen is een schema+data-migratie, geen UI-edit.
 - `pb_migrations/*.js` maken alleen het **schema**, geen records.
 - `pnpm dev` én `scripts/deploy-vps.sh` draaien de seed **niet** automatisch.
   Symptoom van een niet-gedraaide seed: de site werkt prima (fallback), maar de
   `questions`-collectie en de admin-vragenpagina zijn leeg.
+- De sessie-detailpagina (`/admin/sessions/[slug]`) toont de DB-vragenlijst
+  (`locals.questions`), niet de statische config-lijst — zo blijven tellingen
+  en labels gelijk met stemformulier en team-dashboard.
 
 ### Seed uitvoeren
 

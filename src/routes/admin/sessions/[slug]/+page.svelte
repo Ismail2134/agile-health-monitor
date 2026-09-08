@@ -1,10 +1,10 @@
 <script>
   import QRCode from '$lib/components/QRCode.svelte';
   import RadarChart from '$lib/components/RadarChart.svelte';
-  import { surveyQuestions } from '$lib/config.js';
 
   let { data } = $props();
   let session = $derived(data?.session);
+  let questions = $derived(data?.questions ?? []);
   let voters = $derived(data?.voters ?? []);
   let matrix = $derived(data?.matrix ?? {});
   let comments = $derived(data?.comments ?? []);
@@ -67,7 +67,7 @@
   {#if voterDatasets.length > 0}
     <section class="mb-8">
       <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Spinnenwebdiagram per teamlid</h3>
-      <RadarChart questions={surveyQuestions} datasets={voterDatasets} size={560} />
+      <RadarChart questions={questions} datasets={voterDatasets} size={560} />
     </section>
   {/if}
 
@@ -100,9 +100,17 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-        {#each surveyQuestions as q}
+        {#each questions as q}
           <tr>
-            <td class="sticky left-0 z-10 bg-white px-4 py-3 text-sm dark:bg-gray-900">{q.question}</td>
+            <td class="sticky left-0 z-10 bg-white px-4 py-3 text-sm dark:bg-gray-900">
+              <details class="inline-details">
+                <summary class="font-medium text-gray-900 dark:text-white">{q.question}</summary>
+                <div class="question-desc">
+                  <span class="dot-sm green"></span>{q.good}<br/>
+                  <span class="dot-sm red"></span>{q.bad}
+                </div>
+              </details>
+            </td>
             {#each voters as voter}
               {@const score = matrix[q.field]?.[voter]}
               <td class="px-3 py-3 text-center text-sm font-semibold" style="background-color:{cellColor(score)}; color:{score != null && score <= 2 ? '#000' : '#fff'};">

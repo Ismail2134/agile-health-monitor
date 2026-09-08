@@ -28,13 +28,15 @@ export async function load({ params, locals }) {
   const sprint = sprints.find(s => s.id === session.sprint);
   const sprintName = sprint?.sprint || session.sprint;
 
+  const questions = locals.questions && locals.questions.length > 0 ? locals.questions : surveyQuestions;
+
   const voterSet = new Set();
   const matrix = {};
   const comments = [];
   const voterData = {};
   const voterRecords = {};
 
-  for (const q of surveyQuestions) {
+  for (const q of questions) {
     matrix[q.field] = {};
   }
 
@@ -47,7 +49,7 @@ export async function load({ params, locals }) {
       voterData[voter] = { label: voter };
     }
 
-    for (const q of surveyQuestions) {
+    for (const q of questions) {
       if (record[q.field] != null) {
         matrix[q.field][voter] = record[q.field];
         voterData[voter][q.field] = record[q.field];
@@ -65,7 +67,7 @@ export async function load({ params, locals }) {
   }
 
   const voterDatasets = Object.values(voterData).filter(d => {
-    for (const q of surveyQuestions) {
+    for (const q of questions) {
       if (d[q.field] != null) return true;
     }
     return false;
@@ -74,6 +76,7 @@ export async function load({ params, locals }) {
   return {
     session: structuredClone(session),
     sprintName,
+    questions: structuredClone(questions),
     voters: [...voterSet],
     matrix: structuredClone(matrix),
     comments: structuredClone(comments),

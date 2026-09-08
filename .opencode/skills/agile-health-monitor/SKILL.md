@@ -98,7 +98,7 @@ src/
         ├── sprints/           # Sprint CRUD
         ├── teams/             # Team CRUD
         ├── votes/             # Stemmen bekijken
-        ├── questions/         # Vragen CRUD
+        ├── questions/         # Vragen beheren (vast op 15: alleen tekst/volgorde)
         ├── sessions/          # Sessie beheer (QR, code, open/dicht toggle)
         └── sessions/[slug]/   # Sessie detail (radar per stemmer, matrix, comments)
 ```
@@ -113,7 +113,7 @@ src/
 | `team_health` | `user`, `session`, `voter_name`, `team`, `sprint`, 15 score + 15 comment velden | Individuele stemmen |
 | `team_summary` | `team`, `sprint`, 15 score velden (gemiddelden) | Geaggregeerde scores |
 | `team_comments` | `sprint`, `team`, 15 comment velden | Geaggregeerde comments |
-| `questions` | `field`, `question`, `good`, `bad`, `order` | Aanpasbare survey vragen |
+| `questions` | `field`, `question`, `good`, `bad`, `order` | Vast op 15; `field`-slug onveranderlijk (koppelt schema + config-keys) |
 | `sessions` | `code` (6-cijfer), `slug`, `team`, `sprint`, `active` (bool) | Stem-sessie beheer |
 
 ## Auth flow
