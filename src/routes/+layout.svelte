@@ -1,5 +1,6 @@
 <script>
   import '../app.css';
+  import LogoIcon from '$lib/components/LogoIcon.svelte';
   import { getPb } from '$lib/pocketbase.js';
   import { navItems, siteTitle } from '$lib/config.js';
 
@@ -40,7 +41,8 @@
 
 <header class="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80">
   <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-    <a href="/" onclick={closeMenu} class="text-lg font-bold text-brand-700 transition-colors hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300">
+    <a href="/" onclick={closeMenu} class="inline-flex items-center gap-2 text-lg font-bold text-brand-700 transition-colors hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300">
+      <LogoIcon class="h-5 w-5 sm:h-6 sm:w-6" />
       {siteTitle}
     </a>
 
