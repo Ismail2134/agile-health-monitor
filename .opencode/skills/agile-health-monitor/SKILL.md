@@ -5,16 +5,52 @@ description: Use when working on the agile-health-monitor project — a SvelteKi
 
 # Agile Health Monitor
 
-## Bezette poorten (niet gebruiken in andere projecten)
+## Bezette poorten
+
+Dit project gebruikt **eigen poorten** zodat het naast andere projecten kan draaien
+(poort-isolatie per project, volgens `~/.config/opencode/AGENTS.md`).
 
 | Poort | Service | Project |
 |---|---|---|
 | `localhost:3000` | Productie app (adapter-node / Docker) | agile-health-monitor |
-| `localhost:5173` | Vite dev server | agile-health-monitor |
-| `localhost:5174` | Vite dev server | poker app |
-| `localhost:8090` | PocketBase API + Admin UI | agile-health-monitor |
+| `localhost:5174` | **Vite dev server** — agile-health-monitor | (zelf) |
+| `localhost:8091` | **PocketBase API + Admin UI** — agile-health-monitor | (zelf) |
+| `localhost:5173` | Vite dev server — **DevOpsGame** (bezet, niet gebruiken) | |
+| `localhost:8090` | PocketBase — **DevOpsGame** (bezet, niet gebruiken) | |
 
-Bij nieuwe projecten: kies andere poorten dan bovenstaande.
+Bij nieuwe projecten: kies andere poorten dan bovenstaande en zet ze in
+`.env.development` (`VITE_PORT` + `POCKETBASE_PORT`) zodat `scripts/kill-dev.sh`
+de juiste poorten vrijmaakt.
+
+## Lokaal starten
+
+1. Zorg dat `pb_setup/pocketbase` binary aanwezig is (in `.gitignore`,
+   handmatig downloaden vanuit `pb_setup/Dockerfile.pocketbase` als 'ie ontbreekt)
+2. Controleer dat `pnpm` werkt en `node_modules` up-to-date is
+3. `pnpm dev` — `predev` draait `scripts/kill-dev.sh` (poort-scoped op5174/8091),
+   daarna start `concurrently` PB + Vite parallel
+4. Beschikbaar op:
+   - App: <http://localhost:5174/>
+   - PB REST API: <http://127.0.0.1:8091/api/>
+   - PB admin UI: <http://127.0.0.1:8091/_/>
+
+Stoppen: Ctrl+C (concurrently killed beide processen). Logs: `/tmp/agile-dev-logs/dev.log`.
+
+## Stack / configuratie
+
+- **Poort-isolatie**: `.env.development` (gitignored) bevat
+  `VITE_PORT=5174`, `POCKETBASE_PORT=8091`, `VITE_POCKETBASE_PUBLIC_URL`,
+  `PB_URL`, `ORIGIN`.
+- **Vite**: `vite.config.js` leest `VITE_PORT` → `port` + `strictPort: true`.
+- **CSRF**: `svelte.config.js` `trustedOrigins` bevat5174 +3000 + productiedomein.
+- **Process-management**: `package.json` `dev` script gebruikt `concurrently`
+  met `dev:pb` (`./pb_setup/pocketbase serve --http=127.0.0.1:8091 --dir=pb_setup/pb_data`)
+  + `dev:vite` (`vite dev`).
+- **Kill-script**: `scripts/kill-dev.sh` leest `.env.development`, doodt alleen
+  processen op de eigen poorten. **Geen globale `pkill`** — andere projecten
+  blijven onaangeroerd.
+- **pnpm 11+**: `pnpm-workspace.yaml` heeft `allowBuilds: { esbuild: true }`
+  voor de esbuild postinstall.
 
 ## Wat het project doet
 

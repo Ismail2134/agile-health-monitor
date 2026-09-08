@@ -1,8 +1,11 @@
 <script>
+  import { PB_PUBLIC_URL } from '$lib/pocketbase.js';
+
   /** @type {{ data: any }} */
   let { data } = $props();
 
   let currentTime = $state(new Date().toLocaleString('nl-NL'));
+  const pbAdminUrl = `${PB_PUBLIC_URL}/_/`;
 </script>
 
 <svelte:head>
@@ -21,7 +24,7 @@
     <span class="text-3xl font-bold text-amber-700 dark:text-amber-400">{data?.sprintCount ?? '-'}</span>
     <p class="mt-1 text-xs font-medium text-amber-600 dark:text-amber-400">Sprints</p>
   </a>
-  <a href="http://127.0.0.1:8090/_/" target="_blank" class="block rounded-xl border border-blue-100 bg-blue-50 p-5 text-center no-underline transition-shadow hover:shadow-md hover:-translate-y-0.5 dark:border-blue-900 dark:bg-blue-950">
+  <a href={pbAdminUrl} target="_blank" class="block rounded-xl border border-blue-100 bg-blue-50 p-5 text-center no-underline transition-shadow hover:shadow-md hover:-translate-y-0.5 dark:border-blue-900 dark:bg-blue-950">
     <span class="text-3xl font-bold text-blue-700 dark:text-blue-400">{data?.userCount ?? '-'}</span>
     <p class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-400">Gebruikers</p>
   </a>
@@ -46,7 +49,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" /></svg>
       Votes bekijken
     </a>
-    <a href="http://127.0.0.1:8090/_/" target="_blank" class="btn-secondary no-underline inline-flex items-center justify-center gap-2 py-2.5 border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100 dark:border-brand-800 dark:bg-brand-950 dark:text-brand-400 dark:hover:bg-brand-900">
+    <a href={pbAdminUrl} target="_blank" class="btn-secondary no-underline inline-flex items-center justify-center gap-2 py-2.5 border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100 dark:border-brand-800 dark:bg-brand-950 dark:text-brand-400 dark:hover:bg-brand-900">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
       PocketBase Admin UI
     </a>

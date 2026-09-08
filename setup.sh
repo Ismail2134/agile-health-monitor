@@ -27,8 +27,10 @@ else
 fi
 
 echo ""
-echo "Starting PocketBase on http://127.0.0.1:8090"
-echo "Admin UI: http://127.0.0.1:8090/_/"
+echo "Starting PocketBase on http://127.0.0.1:${POCKETBASE_PORT:-8091}"
+echo "Admin UI: http://127.0.0.1:${POCKETBASE_PORT:-8091}/_/"
 echo ""
 
-"$PB_DIR/pocketbase" serve --http=127.0.0.1:8090
+[ -f .env.development ] && source .env.development
+PB_PORT="${POCKETBASE_PORT:-8091}"
+"$PB_DIR/pocketbase" serve --http=127.0.0.1:"$PB_PORT"
